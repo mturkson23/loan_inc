@@ -1,0 +1,11 @@
+.header-title {
+  font-family: titillium web, sans-serif;
+  color: #5cb85c;
+  font-weight: 900;
+  font-size: 32px;
+}
+
+.empty-space-4 {
+    margin: 4em;
+    display: block;
+}
