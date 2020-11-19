@@ -49,27 +49,48 @@ def load_transactions(req, **kwargs):
                 "id": transaction[0],
                 "transactionDate": transaction[1],
                 "status": transaction[2],
-                "customerNo": transaction[3],
-                "customerPhone": transaction[4],
-                "customerEmail": transaction[5],
-                "customerAddress": transaction[6],
-                "customerRegion": transaction[7],
-                "customerCity": transaction[8],
-                "customerName": transaction[9],
-                "xCoords": transaction[10],
-                "yCoords": transaction[11],
-                "loanAmount": transaction[12],
-                "paymentRate": transaction[13],
-                "loanState": transaction[14],
-                "datePaid": transaction[15],
-                "amountPaid": transaction[16],
-                "transactionState": transaction[17],
-                "agentNo": transaction[18],
-                "agentName": transaction[19]
+                # missed customerId, hence the jump in numbering
+                "customerNo": transaction[4],
+                "customerPhone": transaction[5],
+                "customerEmail": transaction[6],
+                "customerAddress": transaction[7],
+                "customerRegion": transaction[8],
+                "customerCity": transaction[9],
+                "customerName": transaction[10],
+                "xCoords": transaction[11],
+                "yCoords": transaction[12],
+                "loanAmount": transaction[13],
+                "paymentRate": transaction[14],
+                "loanState": transaction[15],
+                "datePaid": transaction[16],
+                "amountPaid": transaction[17],
+                "transactionState": transaction[18],
+                "agentNo": transaction[19],
+                "agentName": transaction[20]
             })
 
     except Exception as e:
         return {'status': 404, 'data': repr(e)}
+    return {'status': 200, 'data': data}
+
+def add_transaction(req, **kwargs):
+    """
+    Receive transactions from client side on POST
+    :kwargs:
+    """
+    try:
+        loan_id = kwargs.get('loanId')
+        date_paid = kwargs.get('datePaid')
+        amount_paid = kwargs.get('amountPaid')
+        agent_id = kwargs.get('agentId')
+        cursor = db.execute_sql(f'SELECT * from sp_transaction_add({loan_id},NULL,{amount_paid},NULL,{agent_id});')
+        rec = cursor.fetchone()
+        data = {
+            "id": rec[0],
+            "stamp": rec[1],
+        }
+    except Exception as e:
+        return {'status': 400, 'data': repr(e)}
     return {'status': 200, 'data': data}
 
 def get_customer(req, **kwargs):
