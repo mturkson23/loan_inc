@@ -284,7 +284,7 @@ ALTER TABLE public.vw_transaction
 -- DROP FUNCTION public.sp_transaction_search(bigint);
 
 CREATE OR REPLACE FUNCTION public.sp_transaction_search(
-	p_customerid bigint)
+	p_customer_id bigint)
     RETURNS SETOF vw_transaction 
     LANGUAGE 'plpgsql'
 
@@ -303,7 +303,7 @@ v_rec public.vw_transaction%ROWTYPE;
 v_res bigint :=0;
 BEGIN
     /**Load search list**/
-	FOR vci IN v_cur(p_customerid) LOOP
+	FOR vci IN v_cur(p_customer_id) LOOP
 		v_rec := vci;
 		RETURN NEXT v_rec;
 	END LOOP;
@@ -312,3 +312,58 @@ $BODY$;
 
 ALTER FUNCTION public.sp_transaction_search(bigint)
     OWNER TO postgres;
+
+
+-- View: public.vws_add
+
+-- DROP VIEW public.vws_add;
+
+CREATE OR REPLACE VIEW public.vws_add
+ AS
+ SELECT NULL::bigint AS "id",
+    NULL::timestamp without time zone AS "stamp";
+
+ALTER TABLE public.vws_add
+    OWNER TO postgres;
+
+
+-- FUNCTION: public.sp_transaction_add(bigint, date, double precision, bigint, bigint)
+
+-- DROP FUNCTION public.sp_transaction_add(bigint, date, double precision, bigint, bigint);
+
+CREATE OR REPLACE FUNCTION public.sp_transaction_add(
+	p_loan_id bigint,
+	p_date_paid date,
+	p_amount_paid double precision,
+	p_state_id bigint,
+	p_agent_id bigint)
+    RETURNS SETOF vws_add 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+    
+AS $BODY$
+DECLARE
+v_rec vws_add%ROWTYPE;
+v_audit text;
+v_state_id bigint; 
+BEGIN
+SELECT "id" INTO v_state_id FROM transaction_state WHERE score = 1;
+/**Insert Data Into Table**/
+INSERT INTO public.transaction(
+    "loan_id","date_paid","amount_paid","state_id","agent_id"
+) VALUES (p_loan_id, COALESCE(p_date_paid,now()::date), p_amount_paid, COALESCE(p_state_id, v_state_id), p_agent_id)
+RETURNING "id" AS "id", stamp AS stamp INTO v_rec;
+RETURN NEXT v_rec;
+
+END;
+$BODY$;
+
+ALTER FUNCTION public.sp_transaction_add(bigint, date, double precision, bigint, bigint)
+    OWNER TO postgres;
+
+
+
+
