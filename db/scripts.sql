@@ -247,6 +247,7 @@ CREATE OR REPLACE VIEW public.vw_transaction
         WHEN vw.status = 1 THEN 'Active'
         ELSE 'Inactive'
     END AS status,
+    co.id AS "customerId",
     co.customer_no AS "customerNo",
     co.phone AS "customerPhone",
     co.email AS "customerEmail",
@@ -254,8 +255,8 @@ CREATE OR REPLACE VIEW public.vw_transaction
     rg.name AS "customerRegion",
     cy.name AS "customerCity",
     UPPER(co.surname) || ', ' || co.first_name AS "customerName",
-    co.x_coordinate,
-    co.y_coordinate,
+    co.x_coordinate AS "xCoords",
+    co.y_coordinate AS "yCoords",
     lo.amount AS "loanAmount",
     lo.rate AS "paymentRate",
     ls.name AS "loanState",
@@ -296,18 +297,13 @@ DECLARE
 
 v_cur   CURSOR(v_customerid bigint)
 FOR SELECT *, count(*) over () as total FROM public.vw_transaction WHERE
-"id" = COALESCE(v_customerid, "id") ORDER BY "id" ASC;
+"customerId" = COALESCE(v_customerid, "customerId") ORDER BY "id" ASC;
 
 v_rec public.vw_transaction%ROWTYPE;
 v_res bigint :=0;
 BEGIN
     /**Load search list**/
 	FOR vci IN v_cur(p_customerid) LOOP
--- 		IF (v_res = 0) THEN
--- 			v_rec.id = vci.total;
--- 			RETURN NEXT v_rec;
--- 			v_res := 1;
--- 		END IF;
 		v_rec := vci;
 		RETURN NEXT v_rec;
 	END LOOP;
