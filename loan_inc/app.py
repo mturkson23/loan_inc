@@ -5,7 +5,7 @@ from .actions import actions
 # from .utils import handle_requests
 from .db import PeeweeConnectionMiddleware
 from .middlewares import CORSComponent
-from .actions import load_loans, load_customers, load_transactions, get_customer, auth, get_loan
+from .actions import load_loans, load_customers, load_transactions, get_customer, auth, get_loan, add_transaction
 
 class Customers():
     def __init__(self, actions):
@@ -30,7 +30,11 @@ class Transactions():
 
     def on_get(self, req, resp):
         transactions = load_transactions(req)
-        resp.body = json.dumps(transactions, default=str, sort_keys=True)
+        resp.body = json.dumps(transactions, default=str)
+
+    def on_post(self, req, resp):
+        payload = json.loads(req.stream.read(req.content_length or 0))
+        resp.body = json.dumps(add_transaction(req, **payload), default=str, sort_keys=True)
 
 class Loans():
     def __init__(self, actions):
