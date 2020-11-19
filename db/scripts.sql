@@ -232,3 +232,87 @@ CREATE UNIQUE INDEX uidx_transaction_id
     ON transaction USING btree
     ("id" ASC NULLS LAST)
     TABLESPACE pg_default;
+
+
+-- View: public.vw_transaction
+
+-- DROP VIEW public.vw_transaction;
+
+CREATE OR REPLACE VIEW public.vw_transaction
+ AS
+ SELECT 
+    vw.id,
+    vw.date_created AS "transactionDate",
+    CASE
+        WHEN vw.status = 1 THEN 'Active'
+        ELSE 'Inactive'
+    END AS status,
+    co.customer_no AS "customerNo",
+    co.phone AS "customerPhone",
+    co.email AS "customerEmail",
+    co.address AS "customerAddress",
+    rg.name AS "customerRegion",
+    cy.name AS "customerCity",
+    UPPER(co.surname) || ', ' || co.first_name AS "customerName",
+    co.x_coordinate,
+    co.y_coordinate,
+    lo.amount AS "loanAmount",
+    lo.rate AS "paymentRate",
+    ls.name AS "loanState",
+    vw.date_paid AS "datePaid",
+    vw.amount_paid AS "amountPaid",
+    ts.name AS "transactionState",
+    ag.agent_no AS "agentNo",
+    UPPER(ag.surname) || ', ' || ag.first_name AS "agentName"
+   FROM "transaction" vw,
+        transaction_state ts,
+        customer co,
+        loan lo,
+        loan_state ls,
+        agent ag,
+        region rg,
+        city cy
+   WHERE rg.id = co.region_id AND cy.id = co.city_id AND co.id = lo.customer_id AND ag.id = vw.agent_id AND ts.id = vw.state_id AND ls.id = lo.state_id AND lo.id = vw.loan_id;
+
+ALTER TABLE public.vw_transaction
+    OWNER TO postgres;
+
+
+-- FUNCTION: public.sp_transaction_search(bigint)
+
+-- DROP FUNCTION public.sp_transaction_search(bigint);
+
+CREATE OR REPLACE FUNCTION public.sp_transaction_search(
+	p_customerid bigint)
+    RETURNS SETOF vw_transaction 
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+    ROWS 1000
+    
+AS $BODY$
+DECLARE
+
+v_cur   CURSOR(v_customerid bigint)
+FOR SELECT *, count(*) over () as total FROM public.vw_transaction WHERE
+"id" = COALESCE(v_customerid, "id") ORDER BY "id" ASC;
+
+v_rec public.vw_transaction%ROWTYPE;
+v_res bigint :=0;
+BEGIN
+    /**Load search list**/
+	FOR vci IN v_cur(p_customerid) LOOP
+-- 		IF (v_res = 0) THEN
+-- 			v_rec.id = vci.total;
+-- 			RETURN NEXT v_rec;
+-- 			v_res := 1;
+-- 		END IF;
+		v_rec := vci;
+		RETURN NEXT v_rec;
+	END LOOP;
+END;
+$BODY$;
+
+ALTER FUNCTION public.sp_transaction_search(bigint)
+    OWNER TO postgres;
