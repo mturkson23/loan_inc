@@ -12,16 +12,24 @@ The mobile application is build with Ionic v4 with React. So you begin by instal
 
 ### Running
 To start the web application run the command below
-- `gunicorn --reload loan_inc.app --bind localhost:8001`
-NOTE: binding to localhost:8001 is not a strict requirement. We only do this because the mobile app will be listening from this port
+- `gunicorn --reload loan_inc.app`
 
 To the mobile application 
 - `ionic serve` should kickstart a local development server and open a browser to display the app
-
+- For logging in to the website, the demo agent created in the database uses <b>phone number</b> `0244444444` and <b>password</b> `pass` 
 #### Implemented endpoints
 - `/customers` to fetch all users 
 - `/customers/{customer_id}` to fetch user with customer id = customer_id
 - `/loans` to fetch all loans given to customers
 - `/loans/{customer_id}` to fetch loans given to customer with id = customer_id
+- `/transactions` to fetch all transactions. On POST add a new transaction
 
-- `/auth` to authenticate agent for login
+- `/auth` to authenticate agent for login with phone number and password (provided above)
+
+### System Architecture
+![System Architecture of Loan Inc](./arch.png)
+The design of the application tries to reduce the dependency of server side framework and translates basic CRUD and read operations to the database where it is most reliable. This ensures a server-side agnostic design where the business logic remains closer to the data. 
+The transactions `search` and `add` stored procedures in the database is a typical example of this. Although in other areas the peewee ORM is used. To demonstrate the capability of having both options. Though the prior one is advised.
+
+### CI Integration
+![Flow diagram of CI process](./ci.png)
