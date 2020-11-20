@@ -21,13 +21,14 @@ const Tab2: React.FC = () => {
 
   const loadTransactions =()=> {
     const api = axios.create({
-      baseURL: `http://localhost:8001`,  
+      baseURL: `http://127.0.0.1:8000`,  
     });
-    api.get("/transactions/"+deviceToken)
+    api.get("/transactions")
     .then((res) => {
       const data = res?.data;
-      if(data?.length > 0){
-        setTransactions(data);
+      console.log(data)
+      if(data?.data?.length > 0){
+        setTransactions(data.data);
       }
     })
     .catch((error) => {
@@ -44,19 +45,23 @@ const Tab2: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>My Collections</IonTitle>
+          <IonTitle>Collections</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <IonList>
-          {/* <IonItem>
-            <IonLabel>Total Collections</IonLabel>
-            <IonBadge slot="end">22</IonBadge>
-          </IonItem> */}
           {transactions && transactions.map((collection: any) =>
           <IonCard key={collection.id}>
             <IonCardHeader>
-              <IonCardSubtitle>{collection.date_paid}</IonCardSubtitle>
+              <IonCardSubtitle>
+              {new Intl.DateTimeFormat("en-GB", {
+                year: "numeric",
+                month: "long",
+                day: "2-digit"
+              }).format(Date.parse(collection.transactionDate))}                
+              </IonCardSubtitle>
+              <p><b>Customer:</b> {collection.customerName}</p>
+              <p><b>Amount:</b> {collection.amountPaid}</p>
             </IonCardHeader>
           </IonCard>
           )} 
