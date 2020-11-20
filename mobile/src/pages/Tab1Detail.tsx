@@ -38,7 +38,7 @@ const Tab1Detail: React.FC<any> = (props) => {
 
     const loadLoans = () => {
         const api = axios.create({
-            baseURL: `http://localhost:8001`,
+            baseURL: `http://127.0.0.1:8000`,
         });
 
         // const postData = {};
@@ -94,7 +94,7 @@ const Tab1Detail: React.FC<any> = (props) => {
                 <i>GHS {loan.amount}</i>
               </IonCardTitle>
             </IonCardHeader>
-            <IonItem>Amount Repaid <IonBadge color="success" slot="end">GHS {loan.amount_repaid}</IonBadge></IonItem>
+            <IonItem>Amount Repaid<IonBadge color="success" slot="end">GHS {loan.amount_repaid}</IonBadge></IonItem>
             <IonItem>Arears <IonBadge color="danger" slot="end">GHS {Math.abs(-loan.amount+loan.amount_repaid)}</IonBadge></IonItem>
             <IonItem>Prepayments <IonBadge color="primary" slot="end">GHS {loan.amount}</IonBadge></IonItem>
 
