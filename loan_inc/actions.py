@@ -2,6 +2,7 @@ from .db import db, DataBaseMappings, Customer, Region, Agent, Loan, Transaction
 import sys
 import json
 from peewee import fn
+import hashlib
 
 def load_customers(req, **kwargs):
     try:
@@ -173,18 +174,24 @@ def load_loans(req, **kwargs):
 def auth(req, **kwargs):
     """
     Implement authentication methods here
-    :kwargs:
+    :kwargs: phone, passwords
     """
     try:
         agent = Agent.get(Agent.phone == kwargs.get('phone',''))
-        data = {
-            "stamp": agent.stamp,
-            "agent_no": agent.agent_no,
-            "first_name": agent.first_name,
-            "surname": agent.surname,
-        }
+        client_password = str(kwargs.get('password','')).encode('utf-8')
+
+        if agent and (hashlib.md5(client_password).hexdigest() == agent.password_hash):
+            data = {
+                "id": agent.id,
+                "stamp": agent.stamp,
+                "agent_no": agent.agent_no,
+                "first_name": agent.first_name,
+                "surname": agent.surname,
+            }
+        else:
+            raise Exception
     except Exception as e:
-        return {'status': 400, 'data': repr(e)}
+        return {'status': 401, 'data': {}, 'msg': 'Authentication failed. Either the phone number or password supplied is incorrect.'}
     return {'status': 200, 'data': data}
 
 actions = {
