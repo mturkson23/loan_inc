@@ -18,7 +18,7 @@ const Tab1: React.FC = () => {
   const [toastMessage, setToastMessage] = useState("");
   const loadCustomer = () => {
     const api = axios.create({
-      baseURL: `http://localhost:8001`,
+      baseURL: `http://127.0.0.1:8000`,
     });
 
     // const postData = {};
