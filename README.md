@@ -27,9 +27,9 @@ To the mobile application
 - `/auth` to authenticate agent for login with phone number and password (provided above)
 
 ### System Architecture
-![System Architecture of Loan Inc](./arch.png)
+![System Architecture of Loan Inc](./arch.png) <br/>
 The design of the application tries to reduce the dependency of server side framework and translates basic CRUD and read operations to the database where it is most reliable. This ensures a server-side agnostic design where the business logic remains closer to the data. 
 The transactions `search` and `add` stored procedures in the database is a typical example of this. Although in other areas the peewee ORM is used. To demonstrate the capability of having both options. Though the prior one is advised.
 
 ### CI Integration
-![Flow diagram of CI process](./ci.png)
+![Flow diagram of CI process](./ci.png) <br/>
